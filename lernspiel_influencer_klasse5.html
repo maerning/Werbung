@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Escape Room: Gefangen im Werbebüro!</title>
+<style>
+  :root {
+    --primary: #1a1a2e;
+    --accent: #e94560;
+    --gold: #f5a623;
+    --green: #27ae60;
+    --light: #f0f0f0;
+    --card: #16213e;
+    --card2: #0f3460;
+    --text: #eaeaea;
+    --radius: 14px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--primary);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  /* === SCREENS === */
+  .screen { display: none; min-height: 100vh; padding: 20px; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* === INTRO === */
+  #screen-intro {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+  }
+
+  .intro-lock {
+    font-size: 80px;
+    margin-bottom: 20px;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  .intro-title {
+    font-size: 2em;
+    font-weight: 800;
+    color: var(--accent);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .intro-subtitle {
+    font-size: 1.3em;
+    color: var(--gold);
+    margin-bottom: 20px;
+  }
+
+  .intro-story {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    max-width: 600px;
+    margin: 0 auto 30px;
+    text-align: left;
+    border-left: 4px solid var(--accent);
+    font-size: 1em;
+  }
+
+  .intro-story p { margin-bottom: 10px; }
+  .intro-story p:last-child { margin-bottom: 0; }
+
+  .progress-bar-outer {
+    background: var(--card2);
+    border-radius: 20px;
+    height: 16px;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto 8px;
+    overflow: hidden;
+  }
+
+  .progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+    border-radius: 20px;
+    transition: width 0.6s ease;
+  }
+
+  .progress-label {
+    font-size: 0.85em;
+    color: #aaa;
+    margin-bottom: 20px;
+  }
+
+  /* === STATION SCREEN === */
+  .station-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .station-badge {
+    background: var(--accent);
+    color: white;
+    font-weight: 800;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1em;
+    flex-shrink: 0;
+  }
+
+  .station-title-block h2 {
+    font-size: 1.2em;
+    color: var(--gold);
+    margin-bottom: 2px;
+  }
+
+  .station-title-block p {
+    font-size: 0.85em;
+    color: #aaa;
+  }
+
+  .station-time {
+    margin-left: auto;
+    background: var(--card2);
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: 0.85em;
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+
+  /* === CARDS === */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  .card h3 {
+    color: var(--gold);
+    font-size: 1.1em;
+    margin-bottom: 12px;
+  }
+
+  .info-box {
+    background: var(--card2);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    border-left: 4px solid var(--gold);
+  }
+
+  .info-box .highlight { color: var(--gold); font-weight: 700; }
+  .info-box .accent { color: var(--accent); font-weight: 700; }
+
+  /* === BUTTONS === */
+  .btn {
+    display: inline-block;
+    padding: 14px 28px;
+    border-radius: var(--radius);
+    font-size: 1.05em;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.15s, opacity 0.2s;
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #c0392b);
+    color: white;
+    box-shadow: 0 4px 14px rgba(233,69,96,0.4);
+  }
+
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold), #e67e22);
+    color: white;
+    box-shadow: 0 4px 14px rgba(245,166,35,0.4);
+  }
+
+  .btn-green {
+    background: linear-gradient(135deg, var(--green), #1e8449);
+    color: white;
+    box-shadow: 0 4px 14px rgba(39,174,96,0.4);
+  }
+
+  .btn-outline {
+    background: transparent;
+    border: 2px solid var(--accent);
+    color: var(--accent);
+  }
+
+  .btn-center {
+    display: block;
+    margin: 0 auto;
+  }
+
+  /* === QUIZ === */
+  .question-block { margin-bottom: 22px; }
+  .question-block .q-text {
+    font-weight: 600;
+    margin-bottom: 12px;
+    font-size: 1.05em;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+
+  .option-btn {
+    background: var(--card2);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-size: 1em;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+  }
+
+  .option-btn:hover { border-color: var(--accent); background: #1a3060; }
+  .option-btn.correct { background: #1a4a2a; border-color: var(--green); color: #7dfa9a; }
+  .option-btn.wrong { background: #4a1a1a; border-color: var(--accent); color: #fa7d7d; }
+  .option-btn.disabled { pointer-events: none; opacity: 0.6; }
+
+  .feedback {
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.95em;
+    display: none;
+  }
+
+  .feedback.show { display: block; }
+  .feedback.correct { background: #1a4a2a; color: #7dfa9a; }
+  .feedback.wrong { background: #4a1a1a; color: #fa7d7d; }
+
+  /* === CODE REVEAL === */
+  .code-fragment {
+    display: inline-block;
+    background: var(--card2);
+    border: 2px solid var(--gold);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 1.4em;
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: 4px;
+    margin: 6px 4px;
+  }
+
+  .code-fragment.hidden-code {
+    color: #555;
+    border-color: #555;
+    filter: blur(4px);
+  }
+
+  .code-fragment.revealed {
+    animation: revealPop 0.4s ease;
+  }
+
+  @keyframes revealPop {
+    0% { transform: scale(0.5); opacity: 0; }
+    70% { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* === DRAG & DROP === */
+  .drag-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+    min-height: 50px;
+    padding: 10px;
+    background: var(--card2);
+    border-radius: 10px;
+    border: 2px dashed #444;
+  }
+
+  .drag-area.highlight-drop {
+    border-color: var(--gold);
+    background: #1a2a4a;
+  }
+
+  .drag-item {
+    background: var(--accent);
+    color: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: grab;
+    font-size: 0.9em;
+    font-weight: 600;
+    user-select: none;
+    touch-action: none;
+    transition: transform 0.15s;
+  }
+
+  .drag-item:active { cursor: grabbing; transform: scale(1.05); }
+
+  .drop-zone {
+    min-height: 60px;
+    background: var(--card2);
+    border: 2px dashed #555;
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: flex-start;
+    align-content: flex-start;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+  }
+
+  .drop-zone .zone-label {
+    width: 100%;
+    font-size: 0.85em;
+    color: #aaa;
+    margin-bottom: 4px;
+  }
+
+  .drop-zone.correct-zone { border-color: var(--green); background: #0d2a1a; }
+  .drop-zone.wrong-zone { border-color: var(--accent); background: #2a0d0d; }
+
+  /* === SCHAUBILD === */
+  .schaubild-container {
+    background: var(--card2);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .schaubild-box {
+    border: 2px solid var(--gold);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+    font-weight: 700;
+    margin: 8px 0;
+    background: #0a1a30;
+  }
+
+  .schaubild-arrow {
+    text-align: center;
+    font-size: 1.8em;
+    color: var(--gold);
+    margin: 4px 0;
+  }
+
+  .schaubild-row {
+    display: flex;
+    gap: 10px;
+    margin: 8px 0;
+  }
+
+  .schaubild-row .schaubild-box {
+    flex: 1;
+    font-size: 0.9em;
+    padding: 10px;
+  }
+
+  /* === CHECKLIST === */
+  .checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--card2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .checklist-item.checked {
+    background: #0d2a1a;
+    border: 1px solid var(--green);
+  }
+
+  .check-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1em;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all 0.2s;
+  }
+
+  .checklist-item.checked .check-circle {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+
+  /* === FINAL === */
+  #screen-final {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(135deg, #0d2a0d, #1a1a2e);
+  }
+
+  .final-emoji { font-size: 90px; margin-bottom: 20px; animation: bounce 1s infinite alternate; }
+
+  @keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-10px); }
+  }
+
+  .final-title {
+    font-size: 2.2em;
+    font-weight: 800;
+    color: var(--green);
+    margin-bottom: 10px;
+  }
+
+  .final-code-display {
+    font-size: 2.5em;
+    letter-spacing: 10px;
+    color: var(--gold);
+    font-weight: 900;
+    background: var(--card);
+    padding: 20px 30px;
+    border-radius: var(--radius);
+    margin: 20px auto;
+    max-width: 400px;
+    box-shadow: var(--shadow);
+    border: 2px solid var(--gold);
+  }
+
+  .stars { font-size: 2em; margin: 10px 0; }
+
+  /* === MISC === */
+  .divider { border: none; border-top: 1px solid #333; margin: 16px 0; }
+
+  .tip-box {
+    background: #1a2a10;
+    border-left: 4px solid var(--green);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.9em;
+    color: #9fe88a;
+    margin-bottom: 14px;
+  }
+
+  .warn-box {
+    background: #2a1a00;
+    border-left: 4px solid var(--gold);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.9em;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+
+  .center { text-align: center; }
+  .mt { margin-top: 16px; }
+  .mb { margin-bottom: 16px; }
+
+  /* === INPUT === */
+  input[type="text"] {
+    background: var(--card2);
+    border: 2px solid #555;
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: white;
+    font-size: 1.1em;
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+    letter-spacing: 4px;
+    font-weight: 700;
+    transition: border-color 0.2s;
+  }
+
+  input[type="text"]:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+
+  /* === SATZ-PUZZLE === */
+  .word-pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    background: var(--card2);
+    border-radius: 10px;
+    min-height: 52px;
+    margin-bottom: 12px;
+    border: 2px dashed #444;
+  }
+
+  .sentence-answer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    background: #0a1a30;
+    border-radius: 10px;
+    min-height: 52px;
+    margin-bottom: 10px;
+    border: 2px dashed #555;
+    align-content: flex-start;
+  }
+
+  .sentence-answer.correct-answer { border-color: var(--green); background: #0d2a1a; }
+  .sentence-answer.wrong-answer { border-color: var(--accent); background: #2a0d0d; }
+
+  .word-chip {
+    background: var(--card2);
+    border: 2px solid #5aabff;
+    color: #5aabff;
+    padding: 7px 13px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 600;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .word-chip:active { transform: scale(0.95); }
+  .word-chip.in-answer { background: #0f3460; border-color: var(--gold); color: var(--gold); }
+  .word-chip.correct-chip { background: #0d2a1a; border-color: var(--green); color: #7dfa9a; pointer-events: none; }
+  .word-chip.wrong-chip { background: #2a0d0d; border-color: var(--accent); color: #fa7d7d; pointer-events: none; }
+
+  /* iPad adjustments */
+  @media (min-width: 600px) {
+    body { font-size: 19px; }
+    .screen { padding: 28px 32px; }
+    .intro-title { font-size: 2.3em; }
+  }
+
+  @media (min-width: 900px) {
+    .screen { padding: 32px 60px; max-width: 800px; margin: 0 auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== INTRO ===================== -->
+<div id="screen-intro" class="screen active">
+  <div class="intro-lock">🔐</div>
+  <div class="intro-title">Gefangen im Werbebüro!</div>
+  <div class="intro-subtitle">Ein Escape Room für dein Politikheft</div>
+
+  <div class="intro-story">
+    <p>📢 <strong>Notfall-Meldung:</strong> Du bist versehentlich im Marketingbüro der Firma „TrendMax GmbH" eingesperrt!</p>
+    <p>Die Türe hat ein <strong>5-stelliges Zahlenschloss</strong>. Den Code kennst du nicht – aber du kannst ihn herausfinden!</p>
+    <p>In 5 Stationen lernst du alles über <strong>Meinungsführer und Influencer</strong>. Jede gelöste Station bringt dir eine Ziffer des Codes.</p>
+    <p>🕐 Du hast <strong>ca. 40 Minuten</strong>. Viel Erfolg!</p>
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <div class="progress-bar-outer">
+      <div class="progress-bar-inner" id="main-progress" style="width: 0%"></div>
+    </div>
+    <div class="progress-label" id="progress-label">Station 1 von 5</div>
+  </div>
+
+  <button class="btn btn-primary btn-center" onclick="startGame()">🚪 Lass uns entkommen!</button>
+</div>
+
+<!-- ===================== STATION 1 ===================== -->
+<div id="screen-s1" class="screen">
+  <div class="station-header">
+    <div class="station-badge">S1</div>
+    <div class="station-title-block">
+      <h2>🕵️ Wer ist ein Meinungsführer?</h2>
+      <p>Lies aufmerksam und beantworte die Fragen!</p>
+    </div>
+    <div class="station-time">⏱ ~7 min</div>
+  </div>
+
+  <div class="card">
+    <h3>📖 Lies folgenden Text:</h3>
+    <div class="info-box">
+      <p>In Emilys Klasse gilt sie als besonders modebewusst. Sie weiß immer, was man im Moment trägt, was ein absolutes „Must have" ist. Außerdem ist sie bei ihrer Klasse sehr beliebt, und alle wollen auch zu anderen Themen Emilys Meinung hören. <span class="highlight">Emily gibt in ihrer Klasse den Ton an.</span></p>
+    </div>
+    <div class="info-box">
+      <p>Solche Personen nennt man <span class="accent">Meinungsführer</span>. Sie sind durch Massenmedien, Internet, Zeitschriften und Radio besonders gut informiert. <span class="highlight">Viele Firmen nutzen dieses Phänomen</span>, indem sie bekannte Persönlichkeiten – z. B. Sportler, Schauspieler oder Sänger – als Werbebotschafter einsetzen.</p>
+    </div>
+    <div class="info-box">
+      <p>Meinungsführer kennen neue Produkte oft als erste. Sie kaufen die Produkte früher als andere und sind damit <span class="highlight">Vorbilder für andere Personen</span>. Außerdem sind sie besonders kontaktfreudig und teilen ihr Wissen gern mit anderen.</p>
+    </div>
+  </div>
+
+  <div class="card" id="s1-quiz">
+    <h3>🧠 Teste dein Wissen – 3 Fragen:</h3>
+
+    <!-- Frage 1 -->
+    <div class="question-block" id="q1-block">
+      <div class="q-text">1. Warum ist Emily eine Meinungsführerin?</div>
+      <div class="options">
+        <button class="option-btn" onclick="checkAnswer('q1', this, false)">Weil sie die beste Schülerin ist.</button>
+        <button class="option-btn" onclick="checkAnswer('q1', this, true)">Weil sie andere beeinflusst, was gerade angesagt ist, und sie sich sehr gut auskennt.</button>
+        <button class="option-btn" onclick="checkAnswer('q1', this, false)">Weil sie im Fernsehen aufgetreten ist.</button>
+      </div>
+      <div class="feedback" id="q1-feedback"></div>
+    </div>
+
+    <!-- Frage 2 -->
+    <div class="question-block" id="q2-block" style="display:none">
+      <div class="q-text">2. Was nutzen viele Firmen aus, wenn sie Meinungsführer als Werbebotschafter einsetzen?</div>
+      <div class="options">
+        <button class="option-btn" onclick="checkAnswer('q2', this, false)">Dass Meinungsführer keine eigene Meinung haben.</button>
+        <button class="option-btn" onclick="checkAnswer('q2', this, false)">Dass Meinungsführer immer bekannte Politiker sind.</button>
+        <button class="option-btn" onclick="checkAnswer('q2', this, true)">Dass Menschen ihren Vorbildern nacheifern und deshalb auch die beworbenen Produkte kaufen.</button>
+      </div>
+      <div class="feedback" id="q2-feedback"></div>
+    </div>
+
+    <!-- Frage 3 -->
+    <div class="question-block" id="q3-block" style="display:none">
+      <div class="q-text">3. Welche Berufsgruppe wird im Text als typische Meinungsführer in der Werbung genannt?</div>
+      <div class="options">
+        <button class="option-btn" onclick="checkAnswer('q3', this, false)">Lehrer und Professoren</button>
+        <button class="option-btn" onclick="checkAnswer('q3', this, true)">Sportler, Schauspieler, Sänger</button>
+        <button class="option-btn" onclick="checkAnswer('q3', this, false)">Ärzte und Ingenieure</button>
+      </div>
+      <div class="feedback" id="q3-feedback"></div>
+    </div>
+  </div>
+
+  <!-- Code-Enthüllung -->
+  <div class="card center" id="s1-code-reveal" style="display:none">
+    <h3>🎉 Super! Du hast die erste Ziffer freigeschaltet:</h3>
+    <div style="margin: 16px 0;">
+      <span class="code-fragment" id="s1-digit">3</span>
+    </div>
+    <p style="color:#aaa; font-size:0.9em;">Schreibe dir die Ziffer auf! Du brauchst sie am Ende.</p>
+    <button class="btn btn-gold btn-center mt" onclick="goToStation(2)">🔓 Weiter zu Station 2 →</button>
+  </div>
+</div>
+
+<!-- ===================== STATION 2 ===================== -->
+<div id="screen-s2" class="screen">
+  <div class="station-header">
+    <div class="station-badge">S2</div>
+    <div class="station-title-block">
+      <h2>⚙️ Wie läuft Beeinflussung ab?</h2>
+      <p>Ordne die Begriffe den richtigen Schritten zu!</p>
+    </div>
+    <div class="station-time">⏱ ~7 min</div>
+  </div>
+
+  <div class="card">
+    <h3>📖 Merke dir das:</h3>
+    <div class="info-box">
+      <p><strong>Schritt 1 – Massenmedien informieren:</strong><br>
+      Radio, Fernsehen, Internet und Zeitschriften senden Kaufanreize. <span class="highlight">Manche Menschen sind für diese Botschaften empfänglicher</span> als andere – sie kennen neue Produkte früh.</p>
+    </div>
+    <div class="info-box">
+      <p><strong>Schritt 2 – Meinungsführer verbreiten:</strong><br>
+      Diese besonders informierten Personen halten ihr Wissen <span class="highlight">nicht für sich</span>. Sie sind kontaktfreudig und beeinflussen ihre Mitmenschen erheblich – beim Kauf, beim Geschmack, beim Verhalten.</p>
+    </div>
+  </div>
+
+  <div class="card" id="s2-drag-section">
+    <h3>🎯 Aufgabe – Zuordnung:</h3>
+    <p style="margin-bottom:8px;">Welcher Begriff gehört zu Schritt 1, welcher zu Schritt 2? Tippe auf einen Begriff und dann auf die richtige Box!</p>
+    <div class="tip-box" style="margin-bottom:12px;">💡 <strong>Tipp:</strong> Falsch abgelegt? Tippe einfach nochmal auf den Begriff – er kommt zurück in die Sammlung!</div>
+
+    <!-- Begriffe zum Auswählen -->
+    <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px;" id="term-pool">
+      <button class="drag-item" id="term-tv" onclick="selectTerm(this)">📺 Fernsehen</button>
+      <button class="drag-item" id="term-emily" onclick="selectTerm(this)">👩 Emily erzählt Freundinnen</button>
+      <button class="drag-item" id="term-insta" onclick="selectTerm(this)">📱 Instagram-Werbung</button>
+      <button class="drag-item" id="term-theo" onclick="selectTerm(this)">⚽ Theo empfiehlt Sportschuhe</button>
+      <button class="drag-item" id="term-magazin" onclick="selectTerm(this)">📰 Modemagazin</button>
+      <button class="drag-item" id="term-klopp" onclick="selectTerm(this)">🏆 Klopp wirbt im TV</button>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+      <div>
+        <div style="color:var(--gold); font-weight:700; margin-bottom:6px; font-size:0.95em;">📡 Schritt 1: Massenmedien informieren</div>
+        <div class="drop-zone" id="zone-schritt1" onclick="dropTerm('schritt1')">
+          <div class="zone-label">Hier ablegen ↓</div>
+        </div>
+      </div>
+      <div>
+        <div style="color:var(--accent); font-weight:700; margin-bottom:6px; font-size:0.95em;">🗣️ Schritt 2: Meinungsführer verbreiten</div>
+        <div class="drop-zone" id="zone-schritt2" onclick="dropTerm('schritt2')">
+          <div class="zone-label">Hier ablegen ↓</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-center mt" onclick="checkDrag()">✅ Zuordnung prüfen</button>
+    <div class="feedback" id="s2-feedback" style="margin-top:12px;"></div>
+  </div>
+
+  <div class="card center" id="s2-code-reveal" style="display:none">
+    <h3>🎉 Gut gemacht! Deine zweite Ziffer:</h3>
+    <div style="margin: 16px 0;">
+      <span class="code-fragment" id="s2-digit">7</span>
+    </div>
+    <p style="color:#aaa; font-size:0.9em;">Nicht vergessen – notiere die Ziffer!</p>
+    <button class="btn btn-gold btn-center mt" onclick="goToStation(3)">🔓 Weiter zu Station 3 →</button>
+  </div>
+</div>
+
+<!-- ===================== STATION 3 ===================== -->
+<div id="screen-s3" class="screen">
+  <div class="station-header">
+    <div class="station-badge">S3</div>
+    <div class="station-title-block">
+      <h2>✏️ Das Schaubild ins Heft</h2>
+      <p>Übertrage das Schaubild in dein Politikheft!</p>
+    </div>
+    <div class="station-time">⏱ ~10 min</div>
+  </div>
+
+  <div class="warn-box">⚠️ <strong>Wichtig:</strong> Nimm jetzt dein <strong>Politikheft</strong> und einen Stift! Diese Station kannst du erst abschließen, wenn das Schaubild fertig ist.</div>
+
+  <div class="card">
+    <h3>📊 Dein Schaubild – Der Beeinflussungsprozess:</h3>
+    <p style="margin-bottom:16px; font-size:0.9em; color:#bbb;">Übertrage dieses Schaubild vollständig und beschrifte alle Kästen und Pfeile!</p>
+
+    <div class="schaubild-container">
+      <!-- Titel -->
+      <div style="text-align:center; font-size:1.1em; font-weight:800; color:var(--gold); margin-bottom:16px;">
+        📢 Der Beeinflussungsprozess durch Meinungsführer
+      </div>
+
+      <!-- Massenmedien -->
+      <div class="schaubild-box" style="border-color:#5aabff; color:#5aabff;">
+        📡 <strong>Massenmedien</strong><br>
+        <span style="font-size:0.85em; font-weight:400;">(Radio, TV, Internet, Zeitschriften)</span>
+      </div>
+
+      <div class="schaubild-arrow">↓</div>
+
+      <!-- Empfängliche Personen -->
+      <div class="schaubild-box" style="border-color:var(--gold); color:var(--gold);">
+        ⭐ <strong>Meinungsführer</strong><br>
+        <span style="font-size:0.85em; font-weight:400;">Besonders informiert, empfänglich für neue Trends</span>
+      </div>
+
+      <div class="schaubild-arrow">↓</div>
+
+      <div style="text-align:center; color:#aaa; font-size:0.85em; margin-bottom:8px;">beeinflussen</div>
+
+      <!-- Mitmenschen -->
+      <div class="schaubild-row">
+        <div class="schaubild-box" style="border-color:var(--accent); color:var(--accent);">
+          👥 Freunde &amp; Mitschüler
+        </div>
+        <div class="schaubild-box" style="border-color:var(--accent); color:var(--accent);">
+          🛍️ Kaufentscheidungen
+        </div>
+        <div class="schaubild-box" style="border-color:var(--accent); color:var(--accent);">
+          👗 Kleidung &amp; Stil
+        </div>
+      </div>
+
+      <div class="schaubild-arrow">↓</div>
+
+      <div class="schaubild-box" style="border-color:var(--green); color:var(--green);">
+        💰 <strong>Ergebnis: Firma verkauft mehr Produkte</strong>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      💡 <strong>Tipp:</strong> Beschrifte jeden Kasten und zeichne die Pfeile ein. Du kannst auch eigene Beispiele (z. B. Emily, Klopp) danebenschreiben!
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>✅ Checkliste – Hast du alles?</h3>
+    <p style="margin-bottom:12px; font-size:0.9em; color:#bbb;">Tippe auf jeden Punkt, wenn du ihn erledigt hast:</p>
+
+    <div class="checklist-item" id="check1" onclick="toggleCheck('check1')">
+      <div class="check-circle" id="check1-circle"></div>
+      <div>Ich habe den Titel „Der Beeinflussungsprozess durch Meinungsführer" geschrieben.</div>
+    </div>
+    <div class="checklist-item" id="check2" onclick="toggleCheck('check2')">
+      <div class="check-circle" id="check2-circle"></div>
+      <div>Ich habe den Kasten „Massenmedien" mit Beispielen eingetragen.</div>
+    </div>
+    <div class="checklist-item" id="check3" onclick="toggleCheck('check3')">
+      <div class="check-circle" id="check3-circle"></div>
+      <div>Ich habe den Kasten „Meinungsführer" beschriftet.</div>
+    </div>
+    <div class="checklist-item" id="check4" onclick="toggleCheck('check4')">
+      <div class="check-circle" id="check4-circle"></div>
+      <div>Ich habe die beinflussten Personen / Bereiche eingetragen.</div>
+    </div>
+    <div class="checklist-item" id="check5" onclick="toggleCheck('check5')">
+      <div class="check-circle" id="check5-circle"></div>
+      <div>Ich habe alle Pfeile eingezeichnet und beschriftet.</div>
+    </div>
+
+    <button class="btn btn-green btn-center mt" id="s3-done-btn" onclick="finishSchaubild()" style="opacity:0.5; pointer-events:none;">
+      ✏️ Schaubild ist fertig – Code freischalten!
+    </button>
+  </div>
+
+  <div class="card center" id="s3-code-reveal" style="display:none">
+    <h3>🎉 Sehr gut! Deine dritte Ziffer:</h3>
+    <div style="margin: 16px 0;">
+      <span class="code-fragment" id="s3-digit">2</span>
+    </div>
+    <p style="color:#aaa; font-size:0.9em;">Gut gemacht – noch zwei Stationen!</p>
+    <button class="btn btn-gold btn-center mt" onclick="goToStation(4)">🔓 Weiter zu Station 4 →</button>
+  </div>
+</div>
+
+<!-- ===================== STATION 4 ===================== -->
+<div id="screen-s4" class="screen">
+  <div class="station-header">
+    <div class="station-badge">S4</div>
+    <div class="station-title-block">
+      <h2>🌟 Influencer & Bezugsgruppen</h2>
+      <p>Das große Abschluss-Quiz!</p>
+    </div>
+    <div class="station-time">⏱ ~8 min</div>
+  </div>
+
+  <div class="card">
+    <h3>📖 Bezugsgruppen – was ist das?</h3>
+    <div class="info-box">
+      <p>Eine <span class="accent">Bezugsgruppe</span> ist die Gruppe der Gleichaltrigen, an der man sich orientiert. Für Jugendliche sind Bezugsgruppen oft <span class="highlight">wichtiger als die eigene Familie</span>. Man möchte dazugehören, akzeptiert werden – und kauft deshalb ähnliche Dinge wie die anderen.</p>
+    </div>
+    <div class="info-box">
+      <p><strong>Bekannte Influencer als Meinungsführer:</strong><br>
+      <span class="highlight">Jürgen Klopp</span> wirbt für Autos und Sportartikel. <span class="highlight">Prinz George</span> gilt als Kindermode-Influencer – wenn er etwas trägt, kaufen Eltern das auch. Die Zwillinge <span class="highlight">Lisa &amp; Lena</span> hatten als Teenagerinnen 14 Mio. Instagram-Abonnenten und beeinflussten Mode-Kaufentscheidungen.</p>
+    </div>
+  </div>
+
+  <div class="card" id="s4-quiz">
+    <h3>🧠 Abschluss-Quiz – 4 Fragen:</h3>
+
+    <!-- Frage 4 -->
+    <div class="question-block" id="q4-block">
+      <div class="q-text">1. Was ist eine „Bezugsgruppe"?</div>
+      <div class="options">
+        <button class="option-btn" onclick="checkAnswer('q4', this, false)">Eine Gruppe aus der Werbung.</button>
+        <button class="option-btn" onclick="checkAnswer('q4', this, true)">Die Gruppe der Gleichaltrigen, an der man sich orientiert.</button>
+        <button class="option-btn" onclick="checkAnswer('q4', this, false)">Eine Familie aus mehreren Generationen.</button>
+      </div>
+      <div class="feedback" id="q4-feedback"></div>
+    </div>
+
+    <!-- Frage 5 -->
+    <div class="question-block" id="q5-block" style="display:none">
+      <div class="q-text">2. Warum ist Jürgen Klopp als Werbebotschafter so gefragt?</div>
+      <div class="options">
+        <button class="option-btn" onclick="checkAnswer('q5', this, false)">Weil er der reichste Mensch Deutschlands ist.</button>
+        <button class="option-btn" onclick="checkAnswer('q5', this, true)">Weil er als erfolgreicher und sympathischer Fußballtrainer für viele Menschen als Vorbild gilt und ihr Kaufverhalten beeinflusst.</button>
+        <button class="option-btn" onclick="checkAnswer('q5', this, false)">Weil er selbst ein Unternehmen besitzt.</button>
+      </div>
+      <div class="feedback" id="q5-feedback"></div>
+    </div>
+
+    <!-- Frage 6 -->
+    <div class="question-block" id="q6-block" style="display:none">
+      <div class="q-text">3. Warum kaufen Eltern manchmal Kinderkleidung, die Prinz George trägt?</div>
+      <div class="options">
+        <button class="option-btn" onclick="checkAnswer('q6', this, true)">Weil Prinz George als Vorbild gilt und Eltern wollen, dass ihre Kinder ähnlich aussehen.</button>
+        <button class="option-btn" onclick="checkAnswer('q6', this, false)">Weil die Kleidung billiger ist als andere.</button>
+        <button class="option-btn" onclick="checkAnswer('q6', this, false)">Weil die Kleidung von der Schule vorgeschrieben wird.</button>
+      </div>
+      <div class="feedback" id="q6-feedback"></div>
+    </div>
+
+    <!-- Frage 7 -->
+    <div class="question-block" id="q7-block" style="display:none">
+      <div class="q-text">4. Du siehst, dass alle in deiner Klasse die gleichen Turnschuhe tragen. Du kaufst dir auch diese Schuhe. Was beschreibt dieses Verhalten?</div>
+      <div class="options">
+        <button class="option-btn" onclick="checkAnswer('q7', this, false)">Zufällige Entscheidung</button>
+        <button class="option-btn" onclick="checkAnswer('q7', this, true)">Den Einfluss der Bezugsgruppe – du möchtest dazugehören.</button>
+        <button class="option-btn" onclick="checkAnswer('q7', this, false)">Vernünftigen Einkauf, weil die Schuhe gut sind.</button>
+      </div>
+      <div class="feedback" id="q7-feedback"></div>
+    </div>
+  </div>
+
+  <!-- Reflexion -->
+  <div class="card" id="s4-reflexion" style="display:none">
+    <h3>🤔 Denke kurz nach:</h3>
+    <div class="info-box">
+      <p><strong>Bist du selbst ein Meinungsführer?</strong><br>
+      In welchem Bereich kennst du dich besonders gut aus? Für welche Dinge interessierst du dich so sehr, dass Freunde dich fragen? Schreibe 2–3 Sätze dazu in dein Politikheft!</p>
+    </div>
+    <div class="tip-box">
+      💡 Beispiele: Sport, Musik, Spiele, Mode, Kochen, Technik, Bücher...
+    </div>
+    <button class="btn btn-green btn-center" onclick="finishReflexion()">✅ Ich habe meine Reflexion aufgeschrieben!</button>
+  </div>
+
+  <div class="card center" id="s4-code-reveal" style="display:none">
+    <h3>🎉 Stark! Deine vierte Ziffer:</h3>
+    <div style="margin: 16px 0;">
+      <span class="code-fragment" id="s4-digit">9</span>
+    </div>
+    <p style="color:#aaa; font-size:0.9em;">Fast geschafft – noch eine letzte Station!</p>
+    <button class="btn btn-gold btn-center mt" onclick="goToStation(5)">🔓 Weiter zu Station 5 →</button>
+  </div>
+</div>
+
+<!-- ===================== STATION 5 ===================== -->
+<div id="screen-s5" class="screen">
+  <div class="station-header">
+    <div class="station-badge">S5</div>
+    <div class="station-title-block">
+      <h2>📲 Was ist ein Influencer?</h2>
+      <p>Lesen, Notizen machen, Rätsel lösen!</p>
+    </div>
+    <div class="station-time">⏱ ~8 min</div>
+  </div>
+
+  <div class="card">
+    <h3>📖 Lies die Definition:</h3>
+    <div class="info-box">
+      <p>Als <span class="accent">Influencer</span> werden Personen bezeichnet, die aufgrund ihrer <span class="highlight">Bekanntheit und ihres hohen Ansehens</span> bevorzugt für Werbung und Vermarktung genutzt werden – auch in sozialen Netzwerken wie Instagram, TikTok oder YouTube.</p>
+    </div>
+    <div class="info-box">
+      <p>Influencer unterscheiden sich von klassischen Meinungsführern: Sie sind keine Klassenkameraden oder Nachbarn, sondern <span class="highlight">oft unbekannte Personen aus dem Internet</span>, die trotzdem einen riesigen Einfluss auf ihre Follower haben. Je mehr Abonnenten jemand hat, desto wertvoller ist er oder sie für Firmen.</p>
+    </div>
+    <div class="info-box">
+      <p>Bekannte Beispiele: <span class="highlight">Lisa &amp; Lena</span> (Zwillinge, 14 Mio. Abonnenten), <span class="highlight">Prinz George</span> (Kinder-Modeikone), aber auch viele <span class="highlight">Gaming-, Koch- oder Sport-Kanäle</span> auf YouTube. Firmen bezahlen Influencer dafür, dass sie ihre Produkte zeigen – das nennt man <span class="accent">Produktplatzierung</span>.</p>
+    </div>
+  </div>
+
+  <!-- Notizen-Aufgabe -->
+  <div class="card">
+    <h3>✏️ Notizen ins Politikheft!</h3>
+    <div class="warn-box">📓 Nimm dein <strong>Politikheft</strong> und notiere die folgenden Punkte!</div>
+
+    <div class="checklist-item" id="s5-check1" onclick="toggleS5Check('s5-check1')">
+      <div class="check-circle" id="s5-check1-circle"></div>
+      <div><strong>Definition:</strong> Was ist ein Influencer? (eigene Worte, 1–2 Sätze)</div>
+    </div>
+    <div class="checklist-item" id="s5-check2" onclick="toggleS5Check('s5-check2')">
+      <div class="check-circle" id="s5-check2-circle"></div>
+      <div><strong>Unterschied:</strong> Meinungsführer vs. Influencer – was ist anders?</div>
+    </div>
+    <div class="checklist-item" id="s5-check3" onclick="toggleS5Check('s5-check3')">
+      <div class="check-circle" id="s5-check3-circle"></div>
+      <div><strong>Beispiel:</strong> Nenne einen Influencer, den du kennst, und ein Produkt, das er/sie bewirbt.</div>
+    </div>
+
+    <div class="tip-box" style="margin-top:12px;">💡 Du kannst Beispiele aus deinem eigenen Alltag nutzen – welche YouTuber oder TikToker kennst du?</div>
+  </div>
+
+  <!-- Satz-Puzzle -->
+  <div class="card" id="s5-puzzle-section">
+    <h3>🧩 Rätsel – Bringe die Sätze in die richtige Reihenfolge!</h3>
+    <p style="margin-bottom:14px; font-size:0.9em; color:#bbb;">Tippe die Wörter/Satzteile in der richtigen Reihenfolge an. Tippe einen Satzteil nochmal an, um ihn zurückzulegen.</p>
+
+    <!-- Satz 1 -->
+    <div style="margin-bottom:20px;">
+      <div style="color:var(--gold); font-weight:700; margin-bottom:8px;">📝 Satz 1: Ordne die Satzteile!</div>
+      <div class="word-pool" id="pool-s1">
+        <!-- wird per JS befüllt -->
+      </div>
+      <div style="color:#aaa; font-size:0.85em; margin-bottom:6px;">➡️ Dein Satz:</div>
+      <div class="sentence-answer" id="answer-s1"></div>
+      <button class="btn btn-outline" style="max-width:180px; padding:8px 14px; font-size:0.9em; margin-bottom:6px;" onclick="resetSentence(1)">🔄 Zurücksetzen</button>
+    </div>
+
+    <!-- Satz 2 -->
+    <div style="margin-bottom:20px;">
+      <div style="color:var(--gold); font-weight:700; margin-bottom:8px;">📝 Satz 2: Ordne die Satzteile!</div>
+      <div class="word-pool" id="pool-s2">
+        <!-- wird per JS befüllt -->
+      </div>
+      <div style="color:#aaa; font-size:0.85em; margin-bottom:6px;">➡️ Dein Satz:</div>
+      <div class="sentence-answer" id="answer-s2"></div>
+      <button class="btn btn-outline" style="max-width:180px; padding:8px 14px; font-size:0.9em; margin-bottom:6px;" onclick="resetSentence(2)">🔄 Zurücksetzen</button>
+    </div>
+
+    <button class="btn btn-primary btn-center" onclick="checkSentences()">✅ Sätze prüfen</button>
+    <div class="feedback" id="s5-puzzle-feedback" style="margin-top:12px;"></div>
+  </div>
+
+  <!-- Code-Enthüllung S5 -->
+  <div class="card center" id="s5-code-reveal" style="display:none">
+    <h3>🎉 Ausgezeichnet! Deine fünfte und letzte Ziffer:</h3>
+    <div style="margin: 16px 0;">
+      <span class="code-fragment" id="s5-digit">4</span>
+    </div>
+    <p style="color:#aaa; font-size:0.9em;">Jetzt hast du alle 5 Ziffern! Zum Finale!</p>
+    <button class="btn btn-gold btn-center mt" onclick="goToFinal()">🏆 Zum Abschluss →</button>
+  </div>
+</div>
+
+<!-- ===================== FINAL ===================== -->
+<div id="screen-final" class="screen">
+  <div class="final-emoji">🎉</div>
+  <div class="final-title">Du hast es geschafft!</div>
+  <div class="stars">⭐⭐⭐⭐⭐</div>
+
+  <div style="background:var(--card); border-radius:var(--radius); padding:20px; max-width:500px; width:100%; margin: 16px auto; text-align:center;">
+    <p style="color:#aaa; margin-bottom:8px;">Der vollständige Code lautet:</p>
+    <div class="final-code-display" id="final-code-display">3 – 7 – 2 – 9 – 4</div>
+    <p style="color:#aaa; font-size:0.9em;">Du kannst diesen Code jetzt deiner Lehrperson zeigen! 🎓</p>
+  </div>
+
+  <div style="background:var(--card); border-radius:var(--radius); padding:20px; max-width:500px; width:100%; margin: 0 auto 20px; text-align:left;">
+    <h3 style="color:var(--gold); margin-bottom:12px;">📚 Das hast du heute gelernt:</h3>
+    <ul style="list-style:none; padding:0;">
+      <li style="padding:8px 0; border-bottom:1px solid #333;">✅ Was ein <strong>Meinungsführer</strong> ist und wie man ihn erkennt</li>
+      <li style="padding:8px 0; border-bottom:1px solid #333;">✅ Den <strong>Beeinflussungsprozess</strong> in 2 Schritten (Schaubild im Heft!)</li>
+      <li style="padding:8px 0; border-bottom:1px solid #333;">✅ Was eine <strong>Bezugsgruppe</strong> ist und wie sie uns beeinflusst</li>
+      <li style="padding:8px 0; border-bottom:1px solid #333;">✅ Was ein <strong>Influencer</strong> ist – Definition und Unterschied zum Meinungsführer</li>
+      <li style="padding:8px 0;">✅ Was <strong>Produktplatzierung</strong> bedeutet und wie Firmen Influencer nutzen</li>
+    </ul>
+  </div>
+
+  <button class="btn btn-outline btn-center" onclick="restartGame()">🔄 Nochmal spielen</button>
+</div>
+
+<script>
+// ===== STATE =====
+let s1CorrectCount = 0;
+let s2Done = false;
+let s3CheckCount = 0;
+let s4CorrectCount = 0;
+let selectedTerm = null;
+
+const termCorrectZone = {
+  'term-tv': 'schritt1',
+  'term-insta': 'schritt1',
+  'term-magazin': 'schritt1',
+  'term-emily': 'schritt2',
+  'term-theo': 'schritt2',
+  'term-klopp': 'schritt1'  // Klopp im TV = Massenmedien
+};
+
+const termPlaced = {};
+let s2Checked = false;
+
+// ===== NAVIGATION =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  updateProgress(id);
+}
+
+function updateProgress(screenId) {
+  const map = { 'screen-intro': 0, 'screen-s1': 15, 'screen-s2': 35, 'screen-s3': 55, 'screen-s4': 75, 'screen-s5': 90, 'screen-final': 100 };
+  const labels = { 'screen-s1': 'Station 1 von 5', 'screen-s2': 'Station 2 von 5', 'screen-s3': 'Station 3 von 5', 'screen-s4': 'Station 4 von 5', 'screen-s5': 'Station 5 von 5', 'screen-final': 'Fertig! 🎉' };
+  const pct = map[screenId] || 0;
+  document.getElementById('main-progress').style.width = pct + '%';
+  if (labels[screenId]) document.getElementById('progress-label').textContent = labels[screenId];
+}
+
+function startGame() { showScreen('screen-s1'); }
+function goToStation(n) {
+  showScreen('screen-s' + n);
+  if (n === 5) setTimeout(initS5, 100);
+}
+function goToFinal() { showScreen('screen-final'); }
+
+function restartGame() {
+  location.reload();
+}
+
+// ===== QUIZ LOGIC =====
+const quizState = {
+  q1: { answered: false, nextQ: 'q2-block' },
+  q2: { answered: false, nextQ: 'q3-block' },
+  q3: { answered: false, nextQ: null, onDone: showS1Code },
+  q4: { answered: false, nextQ: 'q5-block' },
+  q5: { answered: false, nextQ: 'q6-block' },
+  q6: { answered: false, nextQ: 'q7-block' },
+  q7: { answered: false, nextQ: null, onDone: showS4Reflexion }
+};
+
+function checkAnswer(qId, btn, isCorrect) {
+  const state = quizState[qId];
+  if (state.answered) return;
+  state.answered = true;
+
+  const block = btn.closest('.question-block');
+  const allBtns = block.querySelectorAll('.option-btn');
+  allBtns.forEach(b => b.classList.add('disabled'));
+
+  const feedback = document.getElementById(qId + '-feedback');
+  feedback.classList.add('show');
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    feedback.classList.add('correct');
+    feedback.textContent = '✅ Richtig! Gut gemacht!';
+  } else {
+    btn.classList.add('wrong');
+    feedback.classList.add('wrong');
+    feedback.textContent = '❌ Leider falsch. Die richtige Antwort ist markiert.';
+    // Show correct answer
+    allBtns.forEach(b => {
+      if (!b.classList.contains('wrong')) {
+        b.onclick.toString().includes('true') && b.classList.add('correct');
+      }
+    });
+    // Find and mark correct btn
+    block.querySelectorAll('.option-btn').forEach(b => {
+      const fn = b.getAttribute('onclick');
+      if (fn && fn.includes(', true)')) b.classList.add('correct');
+    });
+  }
+
+  setTimeout(() => {
+    if (state.nextQ) {
+      document.getElementById(state.nextQ).style.display = 'block';
+      document.getElementById(state.nextQ).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    if (state.onDone) {
+      setTimeout(state.onDone, 500);
+    }
+  }, 1200);
+}
+
+function showS1Code() {
+  setTimeout(() => {
+    document.getElementById('s1-code-reveal').style.display = 'block';
+    document.getElementById('s1-code-reveal').scrollIntoView({ behavior: 'smooth' });
+  }, 600);
+}
+
+// ===== DRAG LOGIC (tap-based for iPad) =====
+function selectTerm(btn) {
+  if (s2Checked) return;
+  // If item is already placed in a zone → return it to pool on tap
+  if (btn.dataset.placed) {
+    const prevZone = document.getElementById('zone-' + btn.dataset.placed);
+    if (prevZone && prevZone.contains(btn)) prevZone.removeChild(btn);
+    btn.dataset.placed = '';
+    btn.style.outline = 'none';
+    btn.style.background = 'var(--accent)';
+    document.getElementById('term-pool').appendChild(btn);
+    // Deselect if this was the selected item
+    if (selectedTerm === btn) selectedTerm = null;
+    return;
+  }
+  document.querySelectorAll('.drag-item').forEach(b => b.style.outline = 'none');
+  if (selectedTerm === btn) {
+    selectedTerm = null;
+    return;
+  }
+  selectedTerm = btn;
+  btn.style.outline = '3px solid var(--gold)';
+}
+
+function dropTerm(zone) {
+  if (!selectedTerm || s2Checked) return;
+  const zoneEl = document.getElementById('zone-' + zone);
+
+  // Remove from previous zone if any
+  const prevZone = selectedTerm.dataset.placed;
+  if (prevZone) {
+    const prev = document.getElementById('zone-' + prevZone);
+    if (prev.contains(selectedTerm)) prev.removeChild(selectedTerm);
+    selectedTerm.dataset.placed = '';
+  }
+
+  // Also remove from pool if needed
+  const pool = document.getElementById('term-pool');
+  if (pool.contains(selectedTerm)) pool.removeChild(selectedTerm);
+
+  selectedTerm.style.outline = 'none';
+
+  // Add to zone (after label)
+  const label = zoneEl.querySelector('.zone-label');
+  zoneEl.insertBefore(selectedTerm, label ? label.nextSibling : null);
+  selectedTerm.dataset.placed = zone;
+  selectedTerm = null;
+}
+
+function checkDrag() {
+  if (s2Checked) return;
+
+  // Check all 6 terms are placed
+  const allTermIds = ['term-tv', 'term-emily', 'term-insta', 'term-theo', 'term-magazin', 'term-klopp'];
+  const allPlaced = allTermIds.every(id => document.getElementById(id)?.dataset.placed);
+
+  const feedback = document.getElementById('s2-feedback');
+  feedback.classList.add('show');
+
+  if (!allPlaced) {
+    feedback.classList.remove('correct');
+    feedback.classList.add('wrong');
+    feedback.textContent = '⚠️ Ordne erst alle Begriffe zu, bevor du prüfst!';
+    return;
+  }
+
+  let correct = 0;
+  allTermIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.dataset.placed === termCorrectZone[id]) correct++;
+  });
+
+  s2Checked = true;
+
+  if (correct === 6) {
+    feedback.classList.remove('wrong');
+    feedback.classList.add('correct');
+    feedback.textContent = '✅ Perfekt! Alle 6 Begriffe richtig zugeordnet!';
+    setTimeout(showS2Code, 800);
+  } else if (correct >= 4) {
+    feedback.classList.remove('wrong');
+    feedback.classList.add('correct');
+    feedback.textContent = `✅ Gut! ${correct} von 6 richtig. Das reicht – weiter geht's!`;
+    setTimeout(showS2Code, 800);
+  } else {
+    feedback.classList.remove('correct');
+    feedback.classList.add('wrong');
+    feedback.textContent = `❌ Nur ${correct} von 6 richtig. Schau dir den Text nochmal an und versuche es erneut!`;
+    s2Checked = false;
+    // Highlight wrong ones
+    allTermIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        const correct = el.dataset.placed === termCorrectZone[id];
+        el.style.background = correct ? 'var(--green)' : 'var(--accent)';
+      }
+    });
+  }
+}
+
+function showS2Code() {
+  document.getElementById('s2-code-reveal').style.display = 'block';
+  document.getElementById('s2-code-reveal').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ===== CHECKLIST =====
+function toggleCheck(id) {
+  const item = document.getElementById(id);
+  const circle = document.getElementById(id + '-circle');
+  const wasChecked = item.classList.contains('checked');
+
+  item.classList.toggle('checked');
+  circle.textContent = wasChecked ? '' : '✓';
+
+  // Count checked
+  const checks = ['check1','check2','check3','check4','check5'];
+  const count = checks.filter(c => document.getElementById(c)?.classList.contains('checked')).length;
+  s3CheckCount = count;
+
+  const btn = document.getElementById('s3-done-btn');
+  if (count >= 5) {
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = 'auto';
+  } else {
+    btn.style.opacity = '0.5';
+    btn.style.pointerEvents = 'none';
+  }
+}
+
+function finishSchaubild() {
+  document.getElementById('s3-code-reveal').style.display = 'block';
+  document.getElementById('s3-code-reveal').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ===== STATION 4 =====
+function showS4Reflexion() {
+  setTimeout(() => {
+    document.getElementById('s4-reflexion').style.display = 'block';
+    document.getElementById('s4-reflexion').scrollIntoView({ behavior: 'smooth' });
+  }, 600);
+}
+
+function finishReflexion() {
+  document.getElementById('s4-code-reveal').style.display = 'block';
+  document.getElementById('s4-code-reveal').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ===== STATION 5 =====
+
+// Satz-Puzzle Daten
+const sentences = {
+  1: {
+    // "Als Influencer werden Personen bezeichnet, die für Werbung in sozialen Netzwerken genutzt werden."
+    parts: [
+      'Als Influencer',
+      'werden Personen bezeichnet,',
+      'die aufgrund ihrer Bekanntheit',
+      'für Werbung genutzt werden',
+      'in sozialen Netzwerken.'
+    ],
+    correct: [0, 1, 2, 3, 4]
+  },
+  2: {
+    // "Influencer haben viele Follower und beeinflussen damit das Kaufverhalten ihrer Fans."
+    parts: [
+      'Influencer haben viele Follower',
+      'und beeinflussen damit',
+      'das Kaufverhalten',
+      'ihrer Fans.'
+    ],
+    correct: [0, 1, 2, 3]
+  }
+};
+
+// Gemischte Reihenfolge (fest für reproduzierbarkeit)
+const shuffled = {
+  1: [2, 4, 0, 3, 1],
+  2: [3, 1, 0, 2]
+};
+
+// Aktueller Stand der Antwort-Arrays (Indizes in sentences[n].parts)
+const answerState = { 1: [], 2: [] };
+// In Pool verbleibende Indizes
+const poolState = {
+  1: [...shuffled[1]],
+  2: [...shuffled[2]]
+};
+
+let s5PuzzleChecked = false;
+let s5CheckCount = 0;
+
+// Initialisierung wenn S5 geladen wird
+function initS5() {
+  renderPuzzle(1);
+  renderPuzzle(2);
+}
+
+function renderPuzzle(n) {
+  const pool = document.getElementById('pool-s' + n);
+  const answer = document.getElementById('answer-s' + n);
+  pool.innerHTML = '';
+  answer.innerHTML = '';
+
+  // Pool-Chips
+  poolState[n].forEach(idx => {
+    const chip = document.createElement('button');
+    chip.className = 'word-chip';
+    chip.textContent = sentences[n].parts[idx];
+    chip.dataset.idx = idx;
+    chip.onclick = () => moveToAnswer(n, idx, chip);
+    pool.appendChild(chip);
+  });
+
+  // Antwort-Chips
+  answerState[n].forEach(idx => {
+    const chip = document.createElement('button');
+    chip.className = 'word-chip in-answer';
+    chip.textContent = sentences[n].parts[idx];
+    chip.dataset.idx = idx;
+    chip.onclick = () => moveToPool(n, idx, chip);
+    answer.appendChild(chip);
+  });
+}
+
+function moveToAnswer(n, idx, chip) {
+  if (s5PuzzleChecked) return;
+  poolState[n] = poolState[n].filter(i => i !== idx);
+  answerState[n].push(idx);
+  renderPuzzle(n);
+}
+
+function moveToPool(n, idx, chip) {
+  if (s5PuzzleChecked) return;
+  answerState[n] = answerState[n].filter(i => i !== idx);
+  poolState[n].push(idx);
+  renderPuzzle(n);
+}
+
+function resetSentence(n) {
+  if (s5PuzzleChecked) return;
+  answerState[n] = [];
+  poolState[n] = [...shuffled[n]];
+  renderPuzzle(n);
+  // Reset visual state
+  document.getElementById('answer-s' + n).classList.remove('correct-answer', 'wrong-answer');
+}
+
+function checkSentences() {
+  const feedback = document.getElementById('s5-puzzle-feedback');
+  feedback.classList.add('show');
+
+  // Check all chips are placed
+  if (answerState[1].length < sentences[1].parts.length || answerState[2].length < sentences[2].parts.length) {
+    feedback.className = 'feedback show wrong';
+    feedback.textContent = '⚠️ Lege erst alle Satzteile in die richtige Reihenfolge – beide Sätze müssen vollständig sein!';
+    return;
+  }
+
+  const correct1 = answerState[1].join(',') === sentences[1].correct.join(',');
+  const correct2 = answerState[2].join(',') === sentences[2].correct.join(',');
+
+  // Visual feedback per sentence
+  document.getElementById('answer-s1').classList.toggle('correct-answer', correct1);
+  document.getElementById('answer-s1').classList.toggle('wrong-answer', !correct1);
+  document.getElementById('answer-s2').classList.toggle('correct-answer', correct2);
+  document.getElementById('answer-s2').classList.toggle('wrong-answer', !correct2);
+
+  if (correct1 && correct2) {
+    feedback.className = 'feedback show correct';
+    feedback.textContent = '✅ Perfekt! Beide Sätze sind in der richtigen Reihenfolge!';
+    s5PuzzleChecked = true;
+    setTimeout(checkS5Done, 800);
+  } else if (correct1 || correct2) {
+    feedback.className = 'feedback show wrong';
+    feedback.textContent = `✅ Ein Satz ist richtig! ${!correct1 ? 'Satz 1' : 'Satz 2'} stimmt noch nicht – schau ihn nochmal an.`;
+    // Allow retry of wrong sentence
+    if (!correct1) { answerState[1] = []; poolState[1] = [...shuffled[1]]; renderPuzzle(1); document.getElementById('answer-s1').classList.remove('correct-answer','wrong-answer'); }
+    if (!correct2) { answerState[2] = []; poolState[2] = [...shuffled[2]]; renderPuzzle(2); document.getElementById('answer-s2').classList.remove('correct-answer','wrong-answer'); }
+  } else {
+    feedback.className = 'feedback show wrong';
+    feedback.textContent = '❌ Beide Sätze sind noch nicht richtig. Schau dir die Satzteile nochmal an!';
+    answerState[1] = []; poolState[1] = [...shuffled[1]]; renderPuzzle(1);
+    answerState[2] = []; poolState[2] = [...shuffled[2]]; renderPuzzle(2);
+    document.getElementById('answer-s1').classList.remove('correct-answer','wrong-answer');
+    document.getElementById('answer-s2').classList.remove('correct-answer','wrong-answer');
+  }
+}
+
+function toggleS5Check(id) {
+  const item = document.getElementById(id);
+  const circle = document.getElementById(id + '-circle');
+  const wasChecked = item.classList.contains('checked');
+  item.classList.toggle('checked');
+  circle.textContent = wasChecked ? '' : '✓';
+  s5CheckCount = ['s5-check1','s5-check2','s5-check3'].filter(c => document.getElementById(c)?.classList.contains('checked')).length;
+  checkS5Done();
+}
+
+function checkS5Done() {
+  if (s5CheckCount >= 3 && s5PuzzleChecked) {
+    document.getElementById('s5-code-reveal').style.display = 'block';
+    document.getElementById('s5-code-reveal').scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+// (S5-Init ist bereits in goToStation() integriert)
+</script>
+</body>
+</html>
